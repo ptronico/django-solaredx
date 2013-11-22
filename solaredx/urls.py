@@ -10,7 +10,7 @@ dev_api = Api(api_name='dev')
 dev_api.register(UserResource())
 
 
-test_urls = patterns('solaredx_api.views.test',
+test_urls = patterns('solaredx.views',
     url(r'^ping/$', 'ping', name='ping'),
 )
 
