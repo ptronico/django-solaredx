@@ -16,6 +16,6 @@ Quick start
 
 3. Include the polls URLconf in your project urls.py like this:
 
-    url(r'^solaredx/', include('solaredx.urls')),
+    url(r'^solaredx/', include('solaredx.urls'))
 
 4. Visit http://127.0.0.1:8000/solaredx/api/dev/ping/ to ping the API.
