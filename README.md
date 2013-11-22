@@ -18,4 +18,4 @@ Quick start
 
     url(r'^solaredx/', include('solaredx.urls'))
 
-4. Visit http://127.0.0.1:8000/solaredx/api/dev/ping/ to ping the API.
+4. Visit http://localhost:8000/solaredx/api/dev/ to ping the API.
