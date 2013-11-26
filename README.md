@@ -8,7 +8,7 @@ Quick start
 
 1. Install django-solaredx using pip:
 
-    pip install git+git://github.com/ptronico/django-solaredx.git
+    pip install git+git://github.com/wwagner33/django-solaredx.git
 
 2. Add "solaredx" to your INSTALLED_APPS setting like this:
 
