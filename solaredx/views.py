@@ -5,9 +5,22 @@ import json
 from django.core import urlresolvers
 from django.http import HttpResponse
 
+from courseware.courses import get_course
+from xmodule.modulestore.django import loc_mapper
+
 
 def ping(request):
     return HttpResponse(json.dumps('pong'), content_type='application/json')
+
+def test(request):
+
+    c = get_course('UFC/CS101/2013_Fall')
+    course_loc = loc_mapper().translate_location(c.location.course_id, 
+        c.location, published=False, add_entry_if_missing=True)
+    url = course_loc.url_reverse('course/', '')
+
+    return HttpResponse(url)
+    # return HttpResponse(urlresolvers.reverse('about_course', args=['UFC/CS101/2013_Fall']))
 
 
 # Solução para utilização do Django Debug Toolbar

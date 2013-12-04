@@ -7,15 +7,18 @@ from tastypie.api import Api
 
 from .api.resources.ping import PingResource
 from .api.resources.users import UserResource, UserProfileResource
+from .api.resources.courses import CourseResource
 
 
 dev_api = Api(api_name='dev')
 dev_api.register(PingResource())
 dev_api.register(UserResource())
+dev_api.register(CourseResource())
 
 
 test_urls = patterns('solaredx.views',
     url(r'^ping/$', 'ping', name='ping'),
+    url(r'^test/$', 'test', name='test'),
 )
 
 urlpatterns = patterns('',
