@@ -24,6 +24,10 @@ class Course(object):
     course_uri = ''
     studio_uri = ''
     display_name = ''
+    start = ''
+    end = ''
+    enrollment_start = ''
+    enrollment_end = ''
 
     @property
     def course_id_solaredx(self):
@@ -37,6 +41,11 @@ class CourseResource(Resource):
     studio_uri = fields.CharField(attribute='studio_uri')
     display_name = fields.CharField(attribute='display_name')
     course_id_solaredx = fields.CharField(attribute='course_id_solaredx')
+
+    start = fields.DateTimeField(attribute='start', null=True)
+    end = fields.DateTimeField(attribute='end', null=True)
+    enrollment_start = fields.DateTimeField(attribute='enrollment_start', null=True)
+    enrollment_end = fields.DateTimeField(attribute='enrollment_end', null=True)
 
     class Meta:
         object_class = Course
@@ -59,6 +68,13 @@ class CourseResource(Resource):
             c.course_uri = '/courses/%s/about/' % course.id
             c.studio_uri = course_loc.url_reverse('course/', '')
             c.display_name = course.display_name
+
+            c.start = course.start
+            c.end = course.end
+            c.enrollment_start = course.enrollment_start
+            c.enrollment_end = course.enrollment_end
+
+            print course.start
             
             object_list.append(c)
 
