@@ -3,11 +3,41 @@
 import json
 
 from django.core import urlresolvers
-from django.http import HttpResponse
+from django.shortcuts import HttpResponse, redirect
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+from django.contrib.auth import authenticate, login, logout
 
 from courseware.courses import get_course
 from xmodule.modulestore.django import loc_mapper
 
+from .utils import solaredx_encrypt
+
+
+@require_POST
+@csrf_exempt
+def auth_login(request):
+    " Faz login do usuário, de acordo com a solicitação do Solar. "
+    
+    token = request.POST.get('token', '')
+    username = request.POST.get('username', '')
+
+    logout(request)
+    is_logged = False
+
+    user = authenticate(username=username)
+
+    if user is not None:
+        if token == solaredx_encrypt(username):
+            login(request, user)
+            is_logged = True
+    
+    next = request.GET.get('next', '/')
+    
+    if is_logged:
+        return redirect(next)
+    else:
+        return HttpResponse('Invalid username or token.')
 
 def ping(request):
     return HttpResponse(json.dumps('pong'), content_type='application/json')

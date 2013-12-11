@@ -10,9 +10,19 @@ Quick start
 
     pip install git+git://github.com/wwagner33/django-solaredx.git
 
-2. Add "solaredx" to your INSTALLED_APPS setting like this:
+2. Setup your setting link this:
 
     INSTALLED_APPS += ('solaredx_api', )
+
+    TASTYPIE_DEFAULT_FORMATS = ['json']
+
+    TASTYPIE_DATETIME_FORMATTING = 'rfc-2822'
+
+    SOLAREDX_SECRET_KEY = 'your secret key'
+
+    AUTHENTICATION_BACKENDS = (
+        'solaredx.backends.SolarEDXBackend',
+    )    
 
 3. Include the polls URLconf in your project urls.py like this:
 
