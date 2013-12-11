@@ -12,7 +12,7 @@ Quick start
 
 2. Setup your setting link this:
 
-    INSTALLED_APPS += ('solaredx_api', )
+    INSTALLED_APPS += ('solaredx', )
 
     TASTYPIE_DEFAULT_FORMATS = ['json']
 
