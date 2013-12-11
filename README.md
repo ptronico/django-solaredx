@@ -10,7 +10,7 @@ Quick start
 
     pip install git+git://github.com/wwagner33/django-solaredx.git
 
-2. Setup your setting link this:
+2. Setup your settings file like this:
 
     INSTALLED_APPS += ('solaredx', )
 
