@@ -6,12 +6,15 @@
 Bemvindo a documentação do django-solaredx!
 ===========================================
 
+
+
 Contents:
 
 .. toctree::
    :maxdepth: 1
 
    login
+   api
 
 
 
