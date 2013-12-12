@@ -10,8 +10,6 @@ SolarEDX é um pacote Python, plugavel ao `EDX <http://code.edx.org/>`_, que
 permite sua integração com o `Solar <http://apolo11teste.virtual.ufc.br/>`_, 
 através de interfaces REST.
 
-Índice:
-
 .. toctree::
    :maxdepth: 1
 
