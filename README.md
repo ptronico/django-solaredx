@@ -3,7 +3,7 @@ django-solaredx
 
 Django app to provide an EDX API for integrating with Solar 2.
 
-`Documentation: http://django-solaredx.readthedocs.org/`_
+Documentation: http://django-solaredx.readthedocs.org/
 
 Quick start
 -----------
