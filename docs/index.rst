@@ -3,12 +3,14 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Bemvindo a documentação do django-solaredx!
-===========================================
+Bemvindo ao SolarEDX!
+=====================
 
+SolarEDX é um pacote Python, plugavel ao `EDX <http://code.edx.org/>`_, que 
+permite sua integração com o `Solar <http://apolo11teste.virtual.ufc.br/>`_, 
+através de interfaces REST.
 
-
-Contents:
+Índice:
 
 .. toctree::
    :maxdepth: 1

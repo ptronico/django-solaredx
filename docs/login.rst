@@ -1,7 +1,7 @@
 .. _login:
 
-Login SolarEDX
-==============
+Login
+=====
 
 Idealmente o sistema de autenticação deverá ser implementado utilizando o 
 protocolo `OAuth2 <http://oauth.net/2/>`_. Enquanto isso, será utilizado 
