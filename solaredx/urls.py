@@ -13,7 +13,7 @@ dev_api = Api(api_name='dev')
 dev_api.register(PingResource())
 
 # dev_api.register(StaffGroup())
-# dev_api.register(InstructorGroup())
+# dev_api.register(CourseEnrollment2Resource())
 
 dev_api.register(UserResource())
 # dev_api.register(CourseEnrollmentResource())
