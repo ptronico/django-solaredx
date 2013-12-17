@@ -15,7 +15,7 @@ Para listar cursos acesse a URI ``/solaredx/api/dev/course/``.
     ``GET``
 
 :URI:
-    ``/solaredx/api/dev/course/``.
+    ``/solaredx/api/dev/course/``
 
 
 Listagem de Usuários
@@ -27,7 +27,7 @@ Para listar usuários acesse a URI ``/solaredx/api/dev/user/``.
     ``GET``
 
 :URI:
-    ``/solaredx/api/dev/user/``.
+    ``/solaredx/api/dev/user/``
 
 Alocação de usuários (alunos) em cursos
 ---------------------------------------
@@ -40,7 +40,7 @@ interno ao do usuário.
     ``POST``
 
 :URI:
-    ``/solaredx/api/dev/user/<username>/course_enrollment/``. 
+    ``/solaredx/api/dev/user/<username>/course_enrollment/``
 
 :Parâmetros:
 

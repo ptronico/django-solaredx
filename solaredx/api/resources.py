@@ -333,6 +333,9 @@ class UserResource(ModelResource):
     def update_enrollment(self, request, **kwargs):
         " This endpont implements a transparent `enroll` or `unenroll` action. "
 
+        # Para me retornar o nome do curso, id do curso e os 
+        # endereços absolutos (aluno e professor) , viu?
+
         self.method_check(request, allowed=['post'])
         # self.is_authenticated(request)
         # self.throttle_check(request)        
@@ -345,10 +348,27 @@ class UserResource(ModelResource):
             user = None
 
         if user and form.is_valid():
-            form.update_enrollment(user)
-            return self.create_response(request, { 'status' : 'success', })
+
+            course = form.update_enrollment(user)
+
+            course_loc = loc_mapper().translate_location(
+                course.location.course_id, course.location, 
+                published=False, add_entry_if_missing=True)
+
+            response_data = {}
+            response_data['request_status'] = 'success'
+            response_data['course'] = {
+                'course_id': course.id,
+                'display_name': course.display_name,
+                'course_absolute_url': build_lms_absolute_url(
+                    '/courses/%s/about' % course.id),
+                'course_absolute_url_studio': build_cms_absolute_url(
+                    course_loc.url_reverse('course/', '')),
+            }
+
+            return self.create_response(request, response_data)
         else:
-            return self.create_response(request, { 'status' : 'error', })
+            return self.create_response(request, { 'request_status' : 'error' })
 
 
 # Courses

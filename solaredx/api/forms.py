@@ -13,10 +13,14 @@ class CourseEnrollmentUpdateForm(forms.Form):
     course_id = forms.CharField()
     enrollment_action = forms.CharField()
 
+    def __init__(self, *args, **kwargs):
+        super(CourseEnrollmentUpdateForm, self).__init__(*args, **kwargs)
+        self._course = None
+
     def clean_course_id(self):
 
         try:
-            course = course_from_id(self.cleaned_data['course_id'])
+            self._course = course_from_id(self.cleaned_data['course_id'])
         except ItemNotFoundError:
             raise forms.ValidationError('Invalid course id!')
 
@@ -40,3 +44,4 @@ class CourseEnrollmentUpdateForm(forms.Form):
         if self.cleaned_data['enrollment_action'] == 'unenroll':
             CourseEnrollment.unenroll(user, self.cleaned_data['course_id'])
 
+        return self._course
