@@ -40,7 +40,7 @@ interno ao do usuário.
     ``POST``
 
 :URI:
-    ``/solaredx/api/dev/user/<username>/course_enrollment/``
+    ``/solaredx/api/dev/user/<username>/course/``
 
 :Parâmetros:
 

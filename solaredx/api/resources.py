@@ -15,9 +15,12 @@ from tastypie.exceptions import NotFound
 from tastypie.utils import now, trailing_slash
 
 # EDX
-from branding import get_visible_courses
-from student.models import UserProfile, CourseEnrollment
 from xmodule.modulestore.django import loc_mapper
+from xmodule.modulestore.exceptions import ItemNotFoundError
+
+from branding import get_visible_courses
+from student.views import course_from_id
+from student.models import UserProfile, CourseEnrollment
 from course_creators.models import CourseCreator
 
 # SolarEDX
@@ -322,7 +325,7 @@ class UserResource(ModelResource):
 
     def prepend_urls(self):
         return [
-            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/course_enrollment%s$" % (
+            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/course%s$" % (
                 self._meta.resource_name, trailing_slash()), 
                 self.wrap_view('update_enrollment'), 
                 name="api_update_enrollment"),
@@ -336,39 +339,46 @@ class UserResource(ModelResource):
         # Para me retornar o nome do curso, id do curso e os 
         # endereços absolutos (aluno e professor) , viu?
 
-        self.method_check(request, allowed=['post'])
+        # self.method_check(request, allowed=['post'])
         # self.is_authenticated(request)
-        # self.throttle_check(request)        
+        # self.throttle_check(request)
 
-        form = CourseEnrollmentUpdateForm(request.POST)
+        if request.method == 'GET':
 
-        try:
-            user = User.objects.get(username=kwargs['pk'])
-        except User.DoesNotExist:
-            user = None
+            course_resource = PtronicoCourseResource()
+            return course_resource.get_list(request)
 
-        if user and form.is_valid():
+        if request.method == 'POST':
 
-            course = form.update_enrollment(user)
+            form = CourseEnrollmentUpdateForm(request.POST)
 
-            course_loc = loc_mapper().translate_location(
-                course.location.course_id, course.location, 
-                published=False, add_entry_if_missing=True)
+            try:
+                user = User.objects.get(username=kwargs['pk'])
+            except User.DoesNotExist:
+                user = None
 
-            response_data = {}
-            response_data['request_status'] = 'success'
-            response_data['course'] = {
-                'course_id': course.id,
-                'display_name': course.display_name,
-                'course_absolute_url': build_lms_absolute_url(
-                    '/courses/%s/about' % course.id),
-                'course_absolute_url_studio': build_cms_absolute_url(
-                    course_loc.url_reverse('course/', '')),
-            }
+            if user and form.is_valid():
 
-            return self.create_response(request, response_data)
-        else:
-            return self.create_response(request, { 'request_status' : 'error' })
+                course = form.update_enrollment(user)
+
+                course_loc = loc_mapper().translate_location(
+                    course.location.course_id, course.location, 
+                    published=False, add_entry_if_missing=True)
+
+                response_data = {}
+                response_data['request_status'] = 'success'
+                response_data['course'] = {
+                    'course_id': course.id,
+                    'display_name': course.display_name,
+                    'course_absolute_url': build_lms_absolute_url(
+                        '/courses/%s/about' % course.id),
+                    'course_absolute_url_studio': build_cms_absolute_url(
+                        course_loc.url_reverse('course/', '')),
+                }
+
+                return self.create_response(request, response_data)
+            else:
+                return self.create_response(request, { 'request_status' : 'error' })
 
 
 # Courses
@@ -401,7 +411,9 @@ class InstructorGroup(ModelResource):
     class Meta:
         queryset = Group.objects.filter(name__startswith='instructor_')        
 
-class CourseResource(Resource):
+### COURSES
+
+class CourseResourceBase(Resource):
 
     course_id = fields.CharField(attribute='course_id')
     course_absolute_url = fields.CharField(attribute='course_absolute_url')
@@ -436,14 +448,13 @@ class CourseResource(Resource):
                     del objects.data['staff']
                 if 'instructor' in objects.data:
                     del objects.data['instructor']
-        return data        
+        return data
 
-
-    def get_object_list(self, request):
+    def _mount_object_list(self, course_object_list):
 
         object_list = []
 
-        for course in get_visible_courses():
+        for course in course_object_list:
 
             course_loc = loc_mapper().translate_location(
                 course.location.course_id, course.location, 
@@ -463,9 +474,12 @@ class CourseResource(Resource):
             c.enrollment_start = course.enrollment_start
             c.enrollment_end = course.enrollment_end
 
-            object_list.append(c)
+            object_list.append(c) 
 
         return object_list
+
+    # def get_object_list(self, request):
+    #     return self._mount_object_list(get_visible_courses())
  
     def obj_get_list(self, bundle, **kwargs):
         return self.get_object_list(bundle.request)
@@ -475,8 +489,6 @@ class CourseResource(Resource):
             if obj.course_id_solaredx == kwargs[self._meta.detail_uri_name]:
                 break
         return obj
-
-    # URL-related methods.
 
     def detail_uri_kwargs(self, bundle_or_obj):
         """ Semelhante ao mesmo método no `ModelResource`. """
@@ -491,3 +503,130 @@ class CourseResource(Resource):
                 bundle_or_obj, self._meta.detail_uri_name)
 
         return kwargs
+
+# class CourseResource(Resource):
+
+#     course_id = fields.CharField(attribute='course_id')
+#     course_absolute_url = fields.CharField(attribute='course_absolute_url')
+#     course_absolute_url_studio = fields.CharField(attribute='course_absolute_url_studio')
+#     display_name = fields.CharField(attribute='display_name')
+#     course_id_solaredx = fields.CharField(attribute='course_id_solaredx')
+
+#     start = fields.DateTimeField(attribute='start', null=True)
+#     end = fields.DateTimeField(attribute='end', null=True)
+#     enrollment_start = fields.DateTimeField(attribute='enrollment_start', null=True)
+#     enrollment_end = fields.DateTimeField(attribute='enrollment_end', null=True)
+
+#     # Related data
+#     staff = fields.ManyToManyField(UserResource, attribute=lambda bundle: 
+#         User.objects.filter(groups__name__startswith='staff_%s' % 
+#         bundle.obj.course_id), null=True, related_name='staff')
+#     instructor = fields.ManyToManyField(UserResource, attribute=lambda bundle: 
+#         User.objects.filter(groups__name__startswith='instructor_%s' % 
+#         bundle.obj.course_id), null=True, related_name='instructor')
+
+#     class Meta:
+#         object_class = Course
+#         detail_uri_name = 'course_id_solaredx'
+#         # excludes = ['course_id_solaredx']
+
+
+#     def alter_list_data_to_serialize(self, request, data):
+#         # Maneira feia de "excluir" alguns campos (ManyToMany)
+#         if 'objects' in data:
+#             for objects in data['objects']:
+#                 if 'staff' in objects.data:
+#                     del objects.data['staff']
+#                 if 'instructor' in objects.data:
+#                     del objects.data['instructor']
+#         return data      
+
+#     def get_object_list(self, request):
+
+#         object_list = []
+
+#         for course in get_visible_courses():
+
+#             course_loc = loc_mapper().translate_location(
+#                 course.location.course_id, course.location, 
+#                 published=False, add_entry_if_missing=True)
+
+#             c = Course()
+
+#             c.course_id = course.id
+#             c.display_name = course.display_name
+
+#             # URLs
+#             c.course_absolute_url = build_lms_absolute_url('/courses/%s/about' % course.id)
+#             c.course_absolute_url_studio = build_cms_absolute_url(course_loc.url_reverse('course/', ''))            
+
+#             c.start = course.start
+#             c.end = course.end
+#             c.enrollment_start = course.enrollment_start
+#             c.enrollment_end = course.enrollment_end
+
+#             object_list.append(c)
+
+#         return object_list
+ 
+#     def obj_get_list(self, bundle, **kwargs):
+#         return self.get_object_list(bundle.request)
+    
+#     def obj_get(self, bundle, **kwargs):
+#         for obj in self.get_object_list(bundle.request):
+#             if obj.course_id_solaredx == kwargs[self._meta.detail_uri_name]:
+#                 break
+#         return obj
+
+#     # URL-related methods.
+
+#     def detail_uri_kwargs(self, bundle_or_obj):
+#         """ Semelhante ao mesmo método no `ModelResource`. """
+        
+#         kwargs = {}
+
+#         if isinstance(bundle_or_obj, Bundle):
+#             kwargs[self._meta.detail_uri_name] = getattr(
+#                 bundle_or_obj.obj, self._meta.detail_uri_name)
+#         else:
+#             kwargs[self._meta.detail_uri_name] = getattr(
+#                 bundle_or_obj, self._meta.detail_uri_name)
+
+#         return kwargs
+
+
+class CourseResource(CourseResourceBase):
+
+    def get_object_list(self, request):
+
+        course_list = get_visible_courses()
+
+        print 'course_list'
+        print type(course_list)
+        print course_list
+
+        return self._mount_object_list(course_list)
+
+
+class PtronicoCourseResource(CourseResourceBase):
+
+    def get_object_list(self, request):
+        
+        course_list = []
+        user = User.objects.get(username='ptronico')        
+
+        # Código em 'student.views.dashboard'
+        for enrollment in CourseEnrollment.enrollments_for_user(user):
+            try:
+                # course_list.append((course_from_id(enrollment.course_id), enrollment))
+                course_list.append(course_from_id(enrollment.course_id))
+            except ItemNotFoundError:
+                pass
+
+        print 'course_list'
+        print type(course_list)
+        print course_list
+
+        return self._mount_object_list(course_list)
+
+
