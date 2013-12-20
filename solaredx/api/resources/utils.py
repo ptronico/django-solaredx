@@ -17,6 +17,7 @@ class Course(object):
     staff = 1
     course_id = ''
     course_absolute_url = ''
+    course_absolute_url_lms = ''
     course_absolute_url_studio = ''
     display_name = ''
     start = ''
@@ -50,6 +51,10 @@ def mount_course_object_list(course_object_list):
         # URLs
         c.course_absolute_url = build_lms_absolute_url(
             '/courses/%s/about' % course.id)
+
+        c.course_absolute_url_lms = build_lms_absolute_url(
+            '/courses/%s/info' % course.id)
+
         c.course_absolute_url_studio = build_cms_absolute_url(
             course_loc.url_reverse('course/', ''))            
 

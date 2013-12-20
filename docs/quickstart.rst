@@ -13,9 +13,16 @@ Listando usuários
 -----------------
 
 A API provida pelo SolarEDX permite a listagem de usuários através de uma
-requisição HTTP GET::
+requisição HTTP GET. Utilizaremos o ``curl`` para fazer uma requisição via
+terminal: ::
 
     $ curl http://localhost:8001/solaredx/api/dev/user/
+
+A API retorna dados serializados em JSON. A estrutura básica de um `endpoint`
+de listagem de objetos retorna dois campos: ``meta`` e ``objects``. O primeiro, 
+é responsável por trazer metadados sobre os objetos. O segundo retornar uma 
+lista de objetos, no caso, de usuários. Veja o resultado da requisição: ::
+
     {
         "meta": {
             "limit": 20,

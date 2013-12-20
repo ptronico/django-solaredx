@@ -33,6 +33,8 @@ class CourseResourceBase(Resource):
 
     course_id = fields.CharField(attribute='course_id')
     course_absolute_url = fields.CharField(attribute='course_absolute_url')
+    course_absolute_url_lms = fields.CharField(
+        attribute='course_absolute_url_lms')
     course_absolute_url_studio = fields.CharField(
         attribute='course_absolute_url_studio')
     display_name = fields.CharField(attribute='display_name')
@@ -51,10 +53,6 @@ class CourseResourceBase(Resource):
         # excludes = ['course_id_solaredx']
 
     def dehydrate(self, bundle):
-
-        print 'api_name:', self._meta.api_name
-        print 'resource_name:', self._meta.resource_name
-
         resource_uri = bundle.data['resource_uri']
         bundle.data['staff_resource_uri'] = '%sstaff/' % resource_uri
         bundle.data['instructor_resource_uri'] = '%sinstructor/' % resource_uri
@@ -104,7 +102,20 @@ class CourseResourceBase(Resource):
 class CourseResource(CourseResourceBase):
 
     def get_object_list(self, request):
-        return mount_course_object_list(get_visible_courses())
+        return mount_course_object_list(get_visible_courses())     
+
+    # REMOVIDO PARA TER MAIOR CONSISTENCIA
+    # def alter_list_data_to_serialize(self, request, data):
+    #     if 'objects' in data:
+    #         for objects in data['objects']:
+    #             if 'course_absolute_url_lms' in objects.data:
+    #                 del objects.data['course_absolute_url_lms']
+    #     return data
+ 
+    # def alter_detail_data_to_serialize(self, request, data):
+    #     if 'course_absolute_url_lms' in data.data:
+    #         del data.data['course_absolute_url_lms']
+    #     return data
 
     # Adding custom endpoint
 
