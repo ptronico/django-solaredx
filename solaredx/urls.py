@@ -5,19 +5,14 @@ from django.conf.urls import patterns, url, include
 
 from tastypie.api import Api
 
-from .api.resources import * # Temporariamente importando tudo
-
+from .api.resources.ping import PingResource
+from .api.resources.user import UserResource
+from .api.resources.course import CourseResource
 
 dev_api = Api(api_name='dev')
 
 dev_api.register(PingResource())
-
-# dev_api.register(StaffGroup())
-# dev_api.register(CourseEnrollment2Resource())
-
 dev_api.register(UserResource())
-# dev_api.register(CourseEnrollmentResource())
-
 dev_api.register(CourseResource())
 
 
