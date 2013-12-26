@@ -50,6 +50,8 @@ class UserResource(ModelResource):
             for objects in data['objects']:
                 if 'groups' in objects.data:
                     del objects.data['groups']
+                if 'course_resource_uri' in objects.data:
+                    del objects.data['course_resource_uri']
         return data
  
     def alter_detail_data_to_serialize(self, request, data):

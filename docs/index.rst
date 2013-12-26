@@ -17,12 +17,6 @@ alocar professores e tutores pondem ser realizadas pela API.
 
    installing
    quickstart
-
-Documentação de como utilizar o SolarEDX:
-
-.. toctree::
-   :maxdepth: 4
-
    api
    login
 
