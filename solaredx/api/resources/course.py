@@ -21,7 +21,7 @@ from student.models import CourseEnrollment
 
 # SolarEDX
 from .utils import Course, mount_course_object_list
-from ..forms import ManageCourseUserForm
+from ..forms import ManageCourseForm, ManageCourseUserForm
 from ...utils import (course_id_encoder, course_id_decoder, 
     build_lms_absolute_url, build_cms_absolute_url)
     
@@ -30,6 +30,7 @@ from ...utils import (course_id_encoder, course_id_decoder,
 
 
 class CourseResourceBase(Resource):
+    " Classe base de listagem de cursos. "
 
     course_id = fields.CharField(attribute='course_id')
     course_absolute_url = fields.CharField(attribute='course_absolute_url')
@@ -100,6 +101,7 @@ class CourseResourceBase(Resource):
 
 
 class CourseResource(CourseResourceBase):
+    " Lista todos os cursos disponíveis. "
 
     def get_object_list(self, request):
         return mount_course_object_list(get_visible_courses())     
@@ -118,6 +120,19 @@ class CourseResource(CourseResourceBase):
     #     return data
 
     # Adding custom endpoint
+
+    def post_list(self, request, **kwargs):
+        # return self.create_response(request, { 'status': 'success' })
+        form = ManageCourseForm(request.POST)
+        if form.is_valid():            
+            course = form.update()
+            if form.cleaned_data['action'] == 'create':
+                return CourseResource().get_detail(request, 
+                    course_id_solaredx=course_id_encoder(course.id))
+            return self.create_response(request, { 'status': 'success' })
+        else:
+            return self.create_response(request, 
+                { 'status': 'error', 'errors': form.errors })
 
     def prepend_urls(self):
         return [
@@ -169,6 +184,7 @@ class CourseResource(CourseResourceBase):
 
 
 class UserCourseResource(CourseResourceBase):
+    " Lista cursos em que o usuário está matriculado. "
 
     def __init__(self, *args, **kwargs):
         self._current_user = kwargs.pop('user')
@@ -200,8 +216,6 @@ class UserCourseResource(CourseResourceBase):
         """ Semelhante ao mesmo método no `ModelResource`. """
         
         kwargs = {}
-
-        print self._meta.detail_uri_name
 
         if isinstance(bundle_or_obj, Bundle):
             kwargs[self._meta.detail_uri_name] = getattr(

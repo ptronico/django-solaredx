@@ -10,7 +10,7 @@ from tastypie.resources import ModelResource, ALL, ALL_WITH_RELATIONS
 from tastypie.utils import trailing_slash
 
 # SolarEDX
-from ..forms import CourseEnrollmentUpdateForm
+from ..forms import ManageUserForm, CourseEnrollmentUpdateForm
 from ...utils import (course_id_encoder, build_lms_absolute_url, 
     build_cms_absolute_url)
 
@@ -30,7 +30,7 @@ class UserResource(ModelResource):
     
     class Meta:
         queryset = User.objects.select_related('profile').all()
-        fields = ['username', 'email', 'date_joined', 'is_active', 'resource_uri']
+        fields = ['username', 'email', 'date_joined', 'resource_uri']
         detail_uri_name = 'username'
 
         filtering = {
@@ -39,9 +39,20 @@ class UserResource(ModelResource):
             'username': ALL_WITH_RELATIONS,
         }
 
+    def post_list(self, request, **kwargs):
+        form = ManageUserForm(request.POST)
+        if form.is_valid():
+            user = form.update()
+            if form.cleaned_data['action'] == 'delete':
+                return self.create_response(request, { 'status': 'success' })
+            return UserResource().get_detail(request, username=user.username)
+        else:
+            return self.create_response(request, 
+                { 'status': 'error', 'errors': form.errors })
 
     def dehydrate(self, bundle):
         resource_uri = bundle.data['resource_uri']
+        bundle.data['name'] = bundle.obj.profile.name
         bundle.data['course_resource_uri'] = '%scourse/' % resource_uri
         return bundle         
 

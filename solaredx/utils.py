@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import hmac
+import random
 import base64
 import hashlib
 
 from django.conf import settings
-
 
 def course_id_encoder(value):
     return base64.b16encode(value).lower()
@@ -16,6 +16,9 @@ def course_id_decoder(value):
 def solaredx_encrypt(value):
     return hmac.new(settings.SOLAREDX_SECRET_KEY, 
         value, hashlib.sha1).hexdigest()
+
+def generate_random_hexcode(length):
+    return ('%x' % random.randrange(16**length)).zfill(length)
 
 def build_lms_absolute_url(path):
     # return 'http://localhost:8000%s' % path

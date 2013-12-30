@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
 # EDX
-from xmodule.modulestore.django import loc_mapper
+from xmodule.modulestore.django import modulestore, loc_mapper
+from xmodule.modulestore.exceptions import (ItemNotFoundError, 
+    InsufficientSpecificationError)
 
 # SolarEDX
 from ...utils import (course_id_encoder, build_lms_absolute_url, 
@@ -66,5 +68,10 @@ def mount_course_object_list(course_object_list):
         object_list.append(c) 
 
     return object_list
-
     
+def course_exists(course_location):
+    try:
+        existing_course = modulestore('direct').get_item(course_location)
+    except (ItemNotFoundError, InsufficientSpecificationError):
+        existing_course = None
+    return True if existing_course else False
