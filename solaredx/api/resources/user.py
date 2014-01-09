@@ -34,7 +34,9 @@ class UserResource(ModelResource):
         detail_uri_name = 'username'
 
         filtering = {
-            'is_active': ALL,
+            'username': ALL,
+            'email': ALL,
+            'date_joined': ALL,
             'groups': ALL_WITH_RELATIONS,
             'username': ALL_WITH_RELATIONS,
         }

@@ -13,12 +13,12 @@ controlar o EDX. Ações como criar cursos, usuários, gerenciar matrículas,
 alocar professores e tutores pondem ser realizadas pela API.
 
 .. toctree::
-   :maxdepth: 2
+    :maxdepth: 5
 
-   installing
-   quickstart
-   api
-   login
+    installing
+    quickstart
+    api/index
+    login
 
 
 .. Indices and tables

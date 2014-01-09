@@ -4,7 +4,8 @@ Login
 =====
 
 Idealmente o sistema de autenticação deverá ser implementado utilizando o 
-protocolo `OAuth2 <http://oauth.net/2/>`_. Enquanto isso, será utilizado 
+protocolo `OAuth2 <http://oauth.net/2/>`_. Quando isso ocorrer o sistema de 
+login fará parte da API do pacote SolarEDX. Enquanto isso, será utilizado 
 um sistema de autenticação simplificado, descrito abaixo:
 
 Sistema de login simplificado
