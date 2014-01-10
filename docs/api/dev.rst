@@ -11,24 +11,24 @@ versão contém, ``/api/dev/`` na URI.
 
 .. note::
 
-    Use a extensão `Postman <https://chrome.google.com/webstore/detail/postman-rest-client/fdmmgilgnpjigdojojpjoooidkmcomcm?hl=en>`_ do Chrome ou o software 
-    `Curl <http://curl.haxx.se/>`_ para "brincar" com a API enquanto você lê 
-    essa documentação.
+    Uma regra geral é que todas as requisições de consulta/leitura deverão 
+    ser realizadas com ``HTTP`` ``GET``, e as requisições de 
+    modificação/escrita com ``HTTP`` ``POST``.
+
+.. note::
+
+    Utilize o `Curl <http://curl.haxx.se/>`_ ou a extensão `Postman 
+    <https://chrome.google.com/webstore/detail/postman-rest-client/fdmmgilgnpjigdojojpjoooidkmcomcm?hl=en>`_ 
+    do Chrome para "brincar" com a API enquanto você lê essa documentação.
 
 .. note::
 
     Embora faça parte do pacote SolarEDX, o sistema de login via Solar não 
-    está implementado nessa API. Para maiores informações consulte o tópico
-    :ref:`login`.
+    está implementado nessa API. O motivo principal é que a arquitetura do 
+    :ref:`Sistema de Login Simplificado <login>` quebra os princípios 
+    utilizados na API. Além disso, haveria a exposição das credenciais de 
+    autenticação utilizadas na API.
 
-Notas Preliminares
-------------------
-
-Todas as requisições de consulta deverão ser feitas com HTTP GET.
-
-Todas as requisições de escrita deverão ser feitas com HTTP POST.
-
-Etc.
 
 Sistema de Autenticação
 -----------------------

@@ -243,8 +243,8 @@ texinfo_documents = [
 
 # -- Customizações -------------------------------------------------------------
 
-RTD_OLD_THEME = True
+# RTD_OLD_THEME = True
 
-sys.path.append(os.path.abspath('_themes'))
-html_theme_path = ['_themes']
-html_theme = 'kr'
+# sys.path.append(os.path.abspath('_themes'))
+# html_theme_path = ['_themes']
+# html_theme = 'kr'
