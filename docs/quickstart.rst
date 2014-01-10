@@ -14,14 +14,18 @@ Listando usuários
 
 A API provida pelo SolarEDX permite a listagem de usuários através de uma
 requisição HTTP GET. Utilizaremos o ``curl`` para fazer uma requisição via
-terminal: ::
+terminal:
+
+.. code-block:: bash
 
     $ curl http://localhost:8001/solaredx/api/dev/user/
 
 A API retorna dados serializados em JSON. A estrutura básica de um `endpoint`
 de listagem de objetos retorna dois campos: ``meta`` e ``objects``. O primeiro, 
 é responsável por trazer metadados sobre os objetos. O segundo retornar uma 
-lista de objetos, no caso, de usuários. Veja o resultado da requisição: ::
+lista de objetos, no caso, de usuários. Veja o resultado da requisição:
+
+.. code-block:: json
 
     {
         "meta": {
@@ -64,12 +68,16 @@ Consultando um usuário
 
 Perceba que em cada objeto listado na resposta acima há um campo chamado 
 ``resource_uri``. Esse campo fornece a URI de acesso ao objeto. Faremos agora
-uma requisição de leitura ao objeto `ptronico`, utilizando o endereço da URI: ::
+uma requisição de leitura ao objeto `ptronico`, utilizando o endereço da URI:
+
+.. code-block:: bash
 
     $ curl http://localhost:8001/solaredx/api/dev/user/ptronico/
 
 Como se pode ver, a consulta de um objeto retorna apenas o próprio objeto, 
-serializado em JSON. Veja abaixo: :: 
+serializado em JSON. Veja abaixo:
+
+.. code-block:: json
 
     {
         "course_resource_uri": "/solaredx/api/dev/user/ptronico/course/",
@@ -91,11 +99,15 @@ de consultas ao banco de dados.
 
 O campo ``course_resource_uri`` retorna a URI de cursos em que o usuário está
 matriculado. Para consultar em quais cursos o usuário `ptronico` está 
-matriculado, basta realizar a consulta abaixo: ::
+matriculado, basta realizar a consulta abaixo:
+
+.. code-block:: bash
 
     $ curl http://localhost:8001/solaredx/api/dev/user/ptronico/course/
 
-Segue o resultado: ::
+Segue o resultado:
+
+.. code-block:: json
 
     {
         "meta": {
@@ -140,12 +152,16 @@ curso em questão quando a operação ocorrer com sucesso ou um JSON contendo
 realizada.
 
 Na requisição abaixo iremos matricular o usuário no curso 
-``UFC/CT101/2014_01``: ::
+``UFC/CT101/2014_01``:
+
+.. code-block:: bash
 
     $ curl http://localhost:8001/solaredx/api/dev/user/ptronico/course/ --data "course_id=UFC/CT101/2014_01&action=add"
 
 Conforme esperado, a requisição retornou o objeto do curso em que o usuário 
-foi matriculado. Veja abaixo o retorno da requisição: ::
+foi matriculado. Veja abaixo o retorno da requisição:
+
+.. code-block:: json
 
     {
         "course_absolute_url": "http://solaredx.virtual.ufc.br/courses/UFC/CT101/2014_01/about",
@@ -162,12 +178,16 @@ foi matriculado. Veja abaixo o retorno da requisição: ::
     }
 
 Por fim, vamos listar todos os cursos em que o usuário está matriculado apenas 
-para confirmar que a operação foi realizada com sucesso: ::
+para confirmar que a operação foi realizada com sucesso:
+
+.. code-block:: bash
 
     $ curl http://localhost:8001/solaredx/api/dev/user/ptronico/course/
 
 A listagem retornada comprova que o usuário `ptronico` está agora matriculado
-também no curso ``UFC/CT101/2014_01``. Veja o JSON retornado: ::
+também no curso ``UFC/CT101/2014_01``. Veja o JSON retornado:
+
+.. code-block:: json
 
     {
         "meta": {
