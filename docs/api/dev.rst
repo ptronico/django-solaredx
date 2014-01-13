@@ -128,26 +128,6 @@ Essa requisição retorna o seguinte JSON:
         "username": "ptronico"
     }
 
-.. ----
-
-.. Os `endpoints` da API relacionados aos usuários encontram-se 
-.. em ``/api/dev/user/``. Veja abaixo como efetuar operações com usuários:
-
-.. .. note::
-
-..     Acessando ``/api/dev/user/schema/`` você terá a especificação técnica do
-..     `endpoint` de usuários. Nem todas as informações contidas nesse esquema 
-..     estão corretas. O ideal é se orientar por essa documentação.
-
-.. Para listar usuários acesse a URI ``/solaredx/api/dev/user/``.
-
-.. :Método:
-..     ``GET``
-
-.. :URI:
-..     ``/solaredx/api/dev/user/``
-
-
 Criação, modificação e exclusão de usuários
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -245,56 +225,123 @@ Essa requisição retorna o JSON abaixo:
         "status": "success" 
     }
 
-.. Alocação e desalocação de usuários em cursos (matrícula)
-.. ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Alocação e desalocação de usuários em cursos (matrícula)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. Alocando um usuário em um curso
-.. """""""""""""""""""""""""""""""
+Para consultar em quais cursos o usuário está matriculado, iremos acessar a 
+URI contida no campo ``course_resource_uri`` do usuário. Veja o exemplo abaixo:
 
-.. bbb
+.. code-block:: bash
 
-.. Desalocando um usuário em um curso
-.. """"""""""""""""""""""""""""""""""
+    $ curl http://localhost:8001/solaredx/api/dev/user/ptronico/course/
 
-.. ccc
+Como resposta temos:
 
-.. **Alocação de usuários (alunos) em cursos**
+.. code-block:: json
 
-.. Para alocar usuários (alunos) em cursos, deve-se fazer uma requisição de 
-.. acordo com as informações abaixo. Note (veja a URI) que esse é um `endpoint` 
-.. interno ao do usuário.
+    {
+        "meta": {
+            "limit": 20,
+            "next": null,
+            "offset": 0,
+            "previous": null,
+            "total_count": 2
+        },
+        "objects": [
+            {
+                "course_absolute_url": "http://solaredx.virtual.ufc.br/courses/UFC/CS101/2013_Fall/about",
+                "course_absolute_url_lms": "http://solaredx.virtual.ufc.br/courses/UFC/CS101/2013_Fall/info",
+                "course_absolute_url_studio": "http://solaredxstd.virtual.ufc.br/course/UFC.CS101.2013_Fall/branch/draft/block/2013_Fall",
+                "course_id": "UFC/CS101/2013_Fall",
+                "display_name": "Introduction to Computer Science",
+                "end": "Fri, 1 Nov 2013 12:00:00 -0300",
+                "enrollment_end": "Fri, 25 Oct 2013 23:30:00 -0300",
+                "enrollment_start": "Mon, 21 Oct 2013 00:00:00 -0300",
+                "resource_uri": "/solaredx/api/dev/course/5546432f43533130312f323031335f46616c6c/",
+                "start": "Mon, 28 Oct 2013 08:00:00 -0300"
+            },
+            {
+                "course_absolute_url": "http://solaredx.virtual.ufc.br/courses/UFC/CS102/2014.2/about",
+                "course_absolute_url_lms": "http://solaredx.virtual.ufc.br/courses/UFC/CS102/2014.2/info",
+                "course_absolute_url_studio": "http://solaredxstd.virtual.ufc.br/course/UFC.CS102.2014.2/branch/draft/block/2014.2",
+                "course_id": "UFC/CS102/2014.2",
+                "display_name": "Teste de cria\u00e7\u00e3o de curso",
+                "end": null,
+                "enrollment_end": null,
+                "enrollment_start": null,
+                "resource_uri": "/solaredx/api/dev/course/5546432f43533130322f323031342e32/",
+                "start": "Wed, 31 Dec 1969 21:00:00 -0300"
+            },
+        ]
+    }
 
-.. :Método:
-..     ``POST``
+Observando os dados retornados, podemos constatar que o usuário ``ptronico`` 
+está matriculado em dois cursos, sendo eles o ``UFC/CS101/2013_Fall`` e o 
+``UFC/CS102/2014.2``.
 
-.. :URI:
-..     ``/solaredx/api/dev/user/<username>/course/``
+Alocando um usuário em um curso
+"""""""""""""""""""""""""""""""
 
-.. :Parâmetros:
+Para alocar (matricular) um usuário em um curso, deve-se fazer uma requisição
+``HTTP`` ``POST`` para a URI ``/api/dev/user/<username>/course/`` com os campos
+``course_id`` e ``action`` (com o valor ``add``). Veja o exemplo abaixo:
 
-..     ``course_id``
-..         Id do curso. Ex: ``UFC/CT101/2014.01``.
+.. code-block:: bash
 
-..     ``enrollment_action``
-..         Ação a ser realizada. As opções válidas são ``enroll`` e ``unenroll``.
+    $ curl http://localhost:8001/solaredx/api/dev/user/ptronico/course/ --data "course_id=UFC/CT101/2014_01&action=create"
+
+A resposta dessa requisição deverá retornar o curso ao qual o usuário foi 
+matriculado. Vejamos o JSON retornado:
+
+.. code-block:: json
+
+    {
+        "course_absolute_url": "http://solaredx.virtual.ufc.br/courses/UFC/CT101/2014_01/about",
+        "course_absolute_url_lms": "http://solaredx.virtual.ufc.br/courses/UFC/CT101/2014_01/info",
+        "course_absolute_url_studio": "http://solaredxstd.virtual.ufc.br/course/UFC.CT101.2014_01/branch/draft/block/2014_01",
+        "course_id": "UFC/CT101/2014_01",
+        "display_name": "Curso TESTE",
+        "end": null,
+        "enrollment_end": null,
+        "enrollment_start": null,
+        "instructor_resource_uri": "/solaredx/api/dev/course/5546432f43543130312f323031345f3031/instructor/",
+        "staff_resource_uri": "/solaredx/api/dev/course/5546432f43543130312f323031345f3031/staff/",
+        "start": "Wed, 31 Dec 1969 21:00:00 -0300"
+    }
+
+A API sempre retornará o curso. Entretanto a API não cria matrículas duplicadas.
+
+Desalocando um usuário em um curso
+""""""""""""""""""""""""""""""""""
+
+Para desalocar (desmatricular) um usuário em um curso, deve-se fazer uma 
+requisição ``HTTP`` ``POST`` para a URI ``/api/dev/user/<username>/course/`` 
+com os campos ``course_id`` e ``action`` (com o valor ``remove``). Essa 
+chamada é similar a de matrícula. Veja o exemplo abaixo:
+
+.. code-block:: bash
+
+    $ curl http://localhost:8001/solaredx/api/dev/user/ptronico/course/ --data "course_id=UFC/CT101/2014_01&action=remove"
+
+Assim como o `endpoint` de matrícula, a resposta dessa requisição retornará 
+o curso ao qual o usuário foi matriculado. Não há risco em executar essa 
+requisição mesmo com o usuário não matriculado.
 
 
-.. Gestão de Cursos
-.. ----------------
+Gestão de Cursos
+----------------
 
-.. Criação e exclusão de cursos
-.. ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Consulta e listagem de cursos
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. Consulta e listagem de cursos
-.. ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Para listar cursos acesse a URI ``/solaredx/api/dev/course/``.
 
-.. Alocação e desalocação de professores e tutores em cursos
-.. ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Criação e exclusão de cursos
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. Para listar cursos acesse a URI ``/solaredx/api/dev/course/``.
+2
 
-.. :Método:
-..     ``GET``
+Alocação e desalocação de professores e tutores em cursos
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. :URI:
-..     ``/solaredx/api/dev/course/``
+3
