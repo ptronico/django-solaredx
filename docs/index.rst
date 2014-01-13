@@ -17,9 +17,9 @@ alocar professores e tutores pondem ser realizadas pela API.
 
     installing
     quickstart
-    api/index
     login
 
+.. api/index
 
 .. Indices and tables
 .. ==================
