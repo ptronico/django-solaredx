@@ -24,6 +24,7 @@ Instalação
 
     $ pip install git+git://github.com/wwagner33/django-solaredx.git
 
+.. _conf:
 
 Configuração
 ------------
