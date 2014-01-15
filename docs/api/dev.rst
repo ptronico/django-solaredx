@@ -38,7 +38,7 @@ TODO!
 Gestão de Usuários
 ------------------
 
-.. Essa sessão apresenta como gerenciar usuários.
+Essa sessão apresenta como gerenciar usuários.
 
 Listagem e consulta de usuários
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -327,14 +327,61 @@ Assim como o `endpoint` de matrícula, a resposta dessa requisição retornará
 o curso ao qual o usuário foi matriculado. Não há risco em executar essa 
 requisição mesmo com o usuário não matriculado.
 
-
 Gestão de Cursos
 ----------------
+
+Essa sessão apresenta como gerenciar cursos.
 
 Consulta e listagem de cursos
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Para listar cursos acesse a URI ``/solaredx/api/dev/course/``.
+Para listar cursos acesse a URI ``/solaredx/api/dev/course/``. Veja o exemplo
+abaixo:
+
+.. code-block:: bash
+
+    $ curl http://localhost:8001/solaredx/api/dev/course/
+
+O JSON retornado segue abaixo:
+
+.. code-block:: json
+
+    {
+        "meta": {
+            "limit": 20,
+            "next": null,
+            "offset": 0,
+            "previous": null,
+            "total_count": 2
+        },
+        "objects": [
+            {
+                "course_absolute_url": "http://solaredx.virtual.ufc.br/courses/UFC/CS101/2013_Fall/about",
+                "course_absolute_url_lms": "http://solaredx.virtual.ufc.br/courses/UFC/CS101/2013_Fall/info",
+                "course_absolute_url_studio": "http://solaredxstd.virtual.ufc.br/course/UFC.CS101.2013_Fall/branch/draft/block/2013_Fall",
+                "course_id": "UFC/CS101/2013_Fall",
+                "display_name": "Introduction to Computer Science",
+                "end": "Fri, 1 Nov 2013 12:00:00 -0300",
+                "enrollment_end": "Fri, 25 Oct 2013 23:30:00 -0300",
+                "enrollment_start": "Mon, 21 Oct 2013 00:00:00 -0300",
+                "resource_uri": "/solaredx/api/dev/course/5546432f43533130312f323031335f46616c6c/",
+                "start": "Mon, 28 Oct 2013 08:00:00 -0300"
+            },
+            {
+                "course_absolute_url": "http://solaredx.virtual.ufc.br/courses/UFC/CS102/2014.2/about",
+                "course_absolute_url_lms": "http://solaredx.virtual.ufc.br/courses/UFC/CS102/2014.2/info",
+                "course_absolute_url_studio": "http://solaredxstd.virtual.ufc.br/course/UFC.CS102.2014.2/branch/draft/block/2014.2",
+                "course_id": "UFC/CS102/2014.2",
+                "display_name": "Teste de cria\u00e7\u00e3o de curso",
+                "end": null,
+                "enrollment_end": null,
+                "enrollment_start": null,
+                "resource_uri": "/solaredx/api/dev/course/5546432f43533130322f323031342e32/",
+                "start": "Wed, 31 Dec 1969 21:00:00 -0300"
+            }
+        ]
+    }
+
 
 Criação e exclusão de cursos
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -344,4 +391,38 @@ Criação e exclusão de cursos
 Alocação e desalocação de professores e tutores em cursos
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-3
+As operações de consulta de professores e tutores alocados em um curso, bem
+como as requisições de alocação e desalocação de professores e tutores são
+idênticas, diferenciando apenas o `endpoint`, sendo o 
+``instructor_resource_uri`` para operações com Professores e o
+``staff_resource_uri`` para operações com Tutores.
+
+.. note ::
+
+    Entende-se por `instructor` o Professor e `staff` o Tutor.
+
+Consultando professores e tutores alocados em um curs
+""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+1
+
+Alocando professores e tutores em um curso
+""""""""""""""""""""""""""""""""""""""""""
+
+Para alocar um usuário como professor ou tutor em um curso, deve-se fazer uma 
+requisição ``HTTP`` ``POST`` para uma das URIs dos campos 
+``instructor_resource_uri`` ou ``staff_resource_uri``. Deve-se enviar os campos
+``course_id`` e ``action`` (com o valor ``add`` para adicionar ou ``remove``
+para remover).
+
+No exemplo abaixo iremos alocar um 'Professor' em um curso:
+
+.. code-block:: bash
+
+    $ curl
+
+O retorno ...
+
+.. code-block:: json
+
+    {}

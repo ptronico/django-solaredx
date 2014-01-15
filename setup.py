@@ -14,9 +14,9 @@ setup(
     packages=['solaredx'],
     include_package_data=True,
     license='BSD License',  # example license
-    description='A simple Django app to conduct Web-based polls.',
+    description='A simple Django app to provide a API for EDX.',
     long_description=README,
-    url='http://www.example.com/',
+    url='http://virtual.ufc.br/',
     author='Your Name',
     author_email='ptronico@gmail.com',
     classifiers=[

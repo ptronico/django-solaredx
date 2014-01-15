@@ -9,6 +9,7 @@ Instalação
 ----------
 
 1. Instale a dependência abaixo:
+
  * django-tastypie 0.9.16 (https://github.com/toastdriven/django-tastypie/tree/v0.9.16)
 
  .. note::
