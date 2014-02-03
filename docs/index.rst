@@ -12,6 +12,9 @@ Esse pacote implementa, dentre outros recursos, uma API que permite o Solar
 controlar o EDX. Ações como criar cursos, usuários, gerenciar matrículas, 
 alocar professores e tutores pondem ser realizadas pela API.
 
+Índice
+------
+
 .. toctree::
     :maxdepth: 5
 
@@ -29,3 +32,8 @@ alocar professores e tutores pondem ser realizadas pela API.
 .. * :ref:`modindex`
 .. * :ref:`search`
 
+Outras informações
+^^^^^^^^^^^^^^^^^^
+
+Consulte :ref:`Changelog <changelog>` para acompanhar o histórico de 
+atualizações do pacote.

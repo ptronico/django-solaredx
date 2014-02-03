@@ -1,6 +1,6 @@
 .. _resources:
 
-API v1
+API-v1
 ======
 
 Essa documentação cobre a versão ``dev`` da API. Todas as chamadas dessa 
@@ -30,8 +30,8 @@ versão contém, ``/api/dev/`` na URI.
     autenticação utilizadas na API.
 
 
-Sistema de Autenticação
------------------------
+Sistema de Segurança / Autenticação
+-----------------------------------
 
 TODO!
 
