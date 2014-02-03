@@ -15,6 +15,12 @@ dev_api.register(PingResource())
 dev_api.register(UserResource())
 dev_api.register(CourseResource())
 
+from . import api_v1
+
+v1_api = Api(api_name='v1')
+v1_api.register(api_v1.UserResource())
+v1_api.register(api_v1.CourseResource())
+
 
 test_urls = patterns('solaredx.views',
     
@@ -27,6 +33,7 @@ test_urls = patterns('solaredx.views',
 urlpatterns = patterns('',
     url(r'^', include(test_urls, namespace='solaredx', app_name='solaredx')),
     url(r'^api/', include(dev_api.urls)),
+    url(r'^api/', include(v1_api.urls)),
 )
 
 # Solução para utilização do Django Debug Toolbar

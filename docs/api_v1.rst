@@ -1,7 +1,7 @@
 .. _resources:
 
-dev
-===
+API v1
+======
 
 Essa documentação cobre a versão ``dev`` da API. Todas as chamadas dessa 
 versão contém, ``/api/dev/`` na URI.
@@ -401,7 +401,7 @@ idênticas, diferenciando apenas o `endpoint`, sendo o
 
     Entende-se por `instructor` o Professor e `staff` o Tutor.
 
-Consultando professores e tutores alocados em um curs
+Consultando professores e tutores alocados em um curso
 """"""""""""""""""""""""""""""""""""""""""""""""""""""
 
 1
