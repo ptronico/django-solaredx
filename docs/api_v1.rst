@@ -3,8 +3,11 @@
 API-v1
 ======
 
-Essa documentação cobre a versão ``dev`` da API. Todas as chamadas dessa 
-versão contém, ``/api/dev/`` na URI.
+Antes de ler esse artigo é recomendada a leitura do artigo 
+:ref:`Quickstart <quickstart>`.
+
+Essa documentação cobre a versão ``v1`` da API. Todas as chamadas dessa 
+versão contém, ``/api/v1/`` na URI.
 
 .. .. contents::
 ..    :depth: 4
@@ -13,7 +16,9 @@ versão contém, ``/api/dev/`` na URI.
 
     Uma regra geral é que todas as requisições de consulta/leitura deverão 
     ser realizadas com ``HTTP`` ``GET``, e as requisições de 
-    modificação/escrita com ``HTTP`` ``POST``.
+    modificação/escrita com ``HTTP`` ``POST``, ``PATCH`` ou ``DELETE`` para
+    criação, modificação ou exclusão, respecitvamente. Para mais informações
+    consulte o artigo `Status Code Definitions <http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html>`_.
 
 .. note::
 
@@ -30,10 +35,42 @@ versão contém, ``/api/dev/`` na URI.
     autenticação utilizadas na API.
 
 
+Introdução
+----------
+
+A API provida pelo SolarEDX permite as seguintes chamadas:
+
+Chamadas relacionadas à usuários:
+
+* Criar usuários;
+* Listar usuários;
+* Consultar um usuário;
+* Atualizar um usuário;
+* Listar cursos em que o usuário está matriculado;
+* Matricular e desmatricular usuários;
+
+Chamadas relacionadas à cursos:
+
+* Criar cursos;
+* Listar cursos;
+* Consultar um curso;
+* Deletar um curso;
+* Listar professores e tutures de um curso;
+* Associar professores e tutores à um curso;
+* Desassociar professores e tutores à um curso;
+
 Sistema de Segurança / Autenticação
 -----------------------------------
 
-TODO!
+Uma vez que a API provida pelo SolarEDX permite ações globais de controle e, 
+em decorrência disso, o acesso será restrito à apenas clientes autorizados e 
+com IP fixo (por exemplo, o servidor do Solar). Nesse caso, a restrição de 
+acesso deverá ser configurada no servidor do EDX, de modo a bloquear qualquer 
+requisição à API que venha de um IP não autorizado.
+
+.. note::
+    O módulo ``ngx_http_access_module`` permite a instalação desse sistema de 
+    segurança com o `Nginx <http://nginx.org/en/docs/http/ngx_http_access_module.html>`_.
 
 Gestão de Usuários
 ------------------
@@ -45,9 +82,16 @@ Listagem e consulta de usuários
 
 Para efetuar uma listagem geral de usuários do EDX, faça a consulta abaixo:
 
+.. code-block:: text
+
+    GET /solaredx/api/v1/user/ptronico/course/ HTTP/1.1
+    Host: localhost:8001
+    Content-Type: application/json
+    Cache-Control: no-cache
+
 .. code-block:: bash
 
-    $ curl http://localhost:8001/solaredx/api/dev/user/
+    $ curl http://localhost:8001/solaredx/api/v1/user/
 
 O resultado retornado segue abaixo, em JSON:
 
@@ -67,7 +111,7 @@ O resultado retornado segue abaixo, em JSON:
                 "email": "ptronico@gmail.com",
                 "is_active": true,
                 "name": null,
-                "resource_uri": "/solaredx/api/dev/user/ptronico/",
+                "resource_uri": "/solaredx/api/v1/user/ptronico/",
                 "username": "ptronico"
             },
             {
@@ -75,7 +119,7 @@ O resultado retornado segue abaixo, em JSON:
                 "email": "pedro@pedrorafa.com",
                 "is_active": true,
                 "name": null,
-                "resource_uri": "/solaredx/api/dev/user/pedrorafa/",
+                "resource_uri": "/solaredx/api/v1/user/pedrorafa/",
                 "username": "pedrorafa"
             }
         ]
@@ -92,14 +136,14 @@ do Gmail, faça uma requisição como a que se segue:
 
 .. code-block:: bash
 
-    $ curl http://localhost:8001/solaredx/api/dev/user/?email__icontains=@gmail.com
+    $ curl http://localhost:8001/solaredx/api/v1/user/?email__icontains=@gmail.com
 
 Para filtrar usuários cujo cadastro ocorreu a partir de uma determinada
 data, faça uma requisição semelhante a que segue abaixo:
 
 .. code-block:: bash
 
-    $ curl http://localhost:8001/solaredx/api/dev/user/?date_joined__gte=2013-10-02 13:55:00-03:00
+    $ curl http://localhost:8001/solaredx/api/v1/user/?date_joined__gte=2013-10-02 13:55:00-03:00
 
 Note que para o campo ``date_joined`` só será aceito uma data no formato 
 ``YYYY-MM-DD HH:MM[:ss[.uuuuuu]][TZ]``. Ex: ``2013-10-02 13:55:00-03:00``,
@@ -114,14 +158,14 @@ Para consultar um usuário, basta acessar a URI contida no campo
 
 .. code-block:: bash
 
-    $ curl http://localhost:8001/solaredx/api/dev/user/ptronico/
+    $ curl http://localhost:8001/solaredx/api/v1/user/ptronico/
 
 Essa requisição retorna o seguinte JSON:
 
 .. code-block:: json
 
     {
-        "course_resource_uri": "/solaredx/api/dev/user/ptronico/course/",
+        "course_resource_uri": "/solaredx/api/v1/user/ptronico/course/",
         "date_joined": "Wed, 2 Oct 2013 13:53:50 -0300",
         "email": "ptronico@gmail.com",
         "name": "Pedro Vasconcelos",
@@ -131,58 +175,61 @@ Essa requisição retorna o seguinte JSON:
 Criação, modificação e exclusão de usuários
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-As operações de criação, modificação e exclusão de usuários ocorrem mediante
-uma requisição ``HTTP`` ``POST`` para a URI de consulta de usuários, isto é,
-``/api/dev/user/``, enviando os campos ``username`` e ``action``. Outros campos
-deverão também ser enviados, dependendo da operação desejada.
-
 Criando um usuário
 """"""""""""""""""
 
-Para criação de um usuário, deverão ser enviados os campos ``username``, 
-``name``, ``email`` e ``action`` (com o valor "create"). Veja o exemplo 
-abaixo:
+A operação de criação de usuários ocorre mediante uma requisição ``HTTP`` 
+``POST`` para a URI de listagem de usuários, isto é, ``/api/v1/user/``, 
+enviando os campos ``username``, ``email`` e ``name`` codificandos em JSON. 
+Veja o exemplo abaixo:
 
 .. code-block:: bash
 
-    $ curl http://localhost:8001/solaredx/api/dev/user/ --data "username=nungo&name=Contato Nungo&email=contato@nungo.com.br&action=create"
+    $ curl http://localhost:8001/solaredx/api/v1/user/ --header 'Content-Type: application/json' --data '{ "username": "ptronico", "name": "Pedro Vasconcelos", "email": "ptronico@gmail.com" }'
 
-Caso a operação seja efetuada com sucesso, será retornado o usuário criado. 
-Veja a resposta da requisição acima:
+Caso a operação seja efetuada com sucesso, será retornado uma resposta 
+``201 CREATED``. Veja a resposta da requisição acima:
 
 .. code-block:: json
 
     {
-        "course_resource_uri": "/solaredx/api/dev/user/nungo/course/",
-        "date_joined": "Tue, 26 Nov 2013 11:46:11 -0300",
-        "email": "contato@nungo.com.br",
-        "name": "Contato Nungo",
-        "username": "nungo"
+        "email": "ptronico@gmail.com",
+        "name": "Pedro Vasconcelos",
+        "username": "ptronico"
     }
 
-Durante a criação de usuário há a validação dos dados da requisição. Vamos 
-tentar criar um usuário já existente. Observe a requisição abaixo: 
+Durante todas as requisições de modificações ou deleções de dados, bem como
+no caso da criação de usuário, há a validação dos dados da requisição. Para
+efeito de demonstração, iremos tentar criar um usuário já existente. Para isso
+iremos repetir a requisição anteior. Observe a requisição abaixo: 
 
 .. code-block:: bash
 
-    $ curl http://localhost:8001/solaredx/api/dev/user/ --data "username=ptronico&name=Pedro&email=ptronico@gmail.com&action=create"
+    $ curl http://localhost:8001/solaredx/api/v1/user/ --header 'Content-Type: application/json' --data '{ "username": "ptronico", "name": "Pedro Vasconcelos", "email": "ptronico@gmail.com" }'
 
+Observe que a resposta da requisição retornou a informação ``400 BAD REQUEST``.
 O JSON retornado segue abaixo:
 
 .. code-block:: json
 
     {
-        "errors": {
-            "username": [
-                "Username already exists!"
-            ]
-        },
-        "status": "error"
+        "email": [
+            "Email already exists!"
+        ],
+        "username": [
+            "Username already exists!"
+        ]
     }
 
 Sempre que houver algum erro haverá, no JSON retornado, o campo ``status`` 
 com o valor ``error``. Além dele, haverá também a especificação do erro, 
 conforme a requisição.
+
+.. note :: 
+
+    Sempre que uma requisição não for realizada com sucesso, por exemplo, 
+    por envio incorreto de dados, será retornado ``400 BAD REQUEST``. Isso vale
+    para qualquer requisição incorreta.
 
 Modificando um usuário
 """"""""""""""""""""""
@@ -193,14 +240,14 @@ Veja o exemplo abaixo:
 
 .. code-block:: bash
 
-    $ curl http://localhost:8001/solaredx/api/dev/user/ --data "username=nungo&name=Nungo Tecnologia&email=contato@nungo.com.br&action=update"
+    $ curl http://localhost:8001/solaredx/api/v1/user/ --data "username=nungo&name=Nungo Tecnologia&email=contato@nungo.com.br&action=update"
 
 Oberve a resposta:
 
 .. code-block:: json
 
     {
-        "course_resource_uri": "/solaredx/api/dev/user/nungo/course/",
+        "course_resource_uri": "/solaredx/api/v1/user/nungo/course/",
         "date_joined": "Tue, 26 Nov 2013 11:46:11 -0300",
         "email": "contato@nungo.com.br",
         "name": "Nungo Tecnologia",
@@ -215,7 +262,7 @@ Para excluir um usuário, deve-se fazer uma requisição enviando os campos
 
 .. code-block:: bash
 
-    $ curl http://localhost:8001/solaredx/api/dev/user/ --data "username=nungo&action=delete"
+    $ curl http://localhost:8001/solaredx/api/v1/user/ --data "username=nungo&action=delete"
 
 Essa requisição retorna o JSON abaixo:
 
@@ -233,7 +280,7 @@ URI contida no campo ``course_resource_uri`` do usuário. Veja o exemplo abaixo:
 
 .. code-block:: bash
 
-    $ curl http://localhost:8001/solaredx/api/dev/user/ptronico/course/
+    $ curl http://localhost:8001/solaredx/api/v1/user/ptronico/course/
 
 Como resposta temos:
 
@@ -257,7 +304,7 @@ Como resposta temos:
                 "end": "Fri, 1 Nov 2013 12:00:00 -0300",
                 "enrollment_end": "Fri, 25 Oct 2013 23:30:00 -0300",
                 "enrollment_start": "Mon, 21 Oct 2013 00:00:00 -0300",
-                "resource_uri": "/solaredx/api/dev/course/5546432f43533130312f323031335f46616c6c/",
+                "resource_uri": "/solaredx/api/v1/course/5546432f43533130312f323031335f46616c6c/",
                 "start": "Mon, 28 Oct 2013 08:00:00 -0300"
             },
             {
@@ -269,7 +316,7 @@ Como resposta temos:
                 "end": null,
                 "enrollment_end": null,
                 "enrollment_start": null,
-                "resource_uri": "/solaredx/api/dev/course/5546432f43533130322f323031342e32/",
+                "resource_uri": "/solaredx/api/v1/course/5546432f43533130322f323031342e32/",
                 "start": "Wed, 31 Dec 1969 21:00:00 -0300"
             },
         ]
@@ -283,12 +330,12 @@ Alocando um usuário em um curso
 """""""""""""""""""""""""""""""
 
 Para alocar (matricular) um usuário em um curso, deve-se fazer uma requisição
-``HTTP`` ``POST`` para a URI ``/api/dev/user/<username>/course/`` com os campos
+``HTTP`` ``POST`` para a URI ``/api/v1/user/<username>/course/`` com os campos
 ``course_id`` e ``action`` (com o valor ``add``). Veja o exemplo abaixo:
 
 .. code-block:: bash
 
-    $ curl http://localhost:8001/solaredx/api/dev/user/ptronico/course/ --data "course_id=UFC/CT101/2014_01&action=create"
+    $ curl http://localhost:8001/solaredx/api/v1/user/ptronico/course/ --data "course_id=UFC/CT101/2014_01&action=create"
 
 A resposta dessa requisição deverá retornar o curso ao qual o usuário foi 
 matriculado. Vejamos o JSON retornado:
@@ -304,8 +351,8 @@ matriculado. Vejamos o JSON retornado:
         "end": null,
         "enrollment_end": null,
         "enrollment_start": null,
-        "instructor_resource_uri": "/solaredx/api/dev/course/5546432f43543130312f323031345f3031/instructor/",
-        "staff_resource_uri": "/solaredx/api/dev/course/5546432f43543130312f323031345f3031/staff/",
+        "instructor_resource_uri": "/solaredx/api/v1/course/5546432f43543130312f323031345f3031/instructor/",
+        "staff_resource_uri": "/solaredx/api/v1/course/5546432f43543130312f323031345f3031/staff/",
         "start": "Wed, 31 Dec 1969 21:00:00 -0300"
     }
 
@@ -315,13 +362,38 @@ Desalocando um usuário em um curso
 """"""""""""""""""""""""""""""""""
 
 Para desalocar (desmatricular) um usuário em um curso, deve-se fazer uma 
-requisição ``HTTP`` ``POST`` para a URI ``/api/dev/user/<username>/course/`` 
+requisição ``HTTP`` ``POST`` para a URI ``/api/v1/user/<username>/course/`` 
 com os campos ``course_id`` e ``action`` (com o valor ``remove``). Essa 
 chamada é similar a de matrícula. Veja o exemplo abaixo:
 
+----
+
+Requisição:
+
+.. code-block:: text
+
+    DELETE /solaredx/api/v1/user/ptronico/course/ HTTP/1.1
+    Host: localhost:8001
+    Content-Type: application/json
+    Cache-Control: no-cache
+
+    { "course_resource_uri": "/solaredx/api/v1/course/5546432f43533130322f323031342e32/" }
+
+Response:
+
+.. code-block:: text
+
+    Request URL:filesystem:chrome-extension://fdmmgilgnpjigdojojpjoooidkmcomcm/temporary/response.html
+    Request Method: GET
+    Status Code: 200 OK (from cache)
+
+    { "course_resource_uri": ["User is not enrolled!"] }
+
+----
+
 .. code-block:: bash
 
-    $ curl http://localhost:8001/solaredx/api/dev/user/ptronico/course/ --data "course_id=UFC/CT101/2014_01&action=remove"
+    $ curl http://localhost:8001/solaredx/api/v1/user/ptronico/course/ --data "course_id=UFC/CT101/2014_01&action=remove"
 
 Assim como o `endpoint` de matrícula, a resposta dessa requisição retornará 
 o curso ao qual o usuário foi matriculado. Não há risco em executar essa 
@@ -335,12 +407,12 @@ Essa sessão apresenta como gerenciar cursos.
 Consulta e listagem de cursos
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Para listar cursos acesse a URI ``/solaredx/api/dev/course/``. Veja o exemplo
+Para listar cursos acesse a URI ``/solaredx/api/v1/course/``. Veja o exemplo
 abaixo:
 
 .. code-block:: bash
 
-    $ curl http://localhost:8001/solaredx/api/dev/course/
+    $ curl http://localhost:8001/solaredx/api/v1/course/
 
 O JSON retornado segue abaixo:
 
@@ -364,7 +436,7 @@ O JSON retornado segue abaixo:
                 "end": "Fri, 1 Nov 2013 12:00:00 -0300",
                 "enrollment_end": "Fri, 25 Oct 2013 23:30:00 -0300",
                 "enrollment_start": "Mon, 21 Oct 2013 00:00:00 -0300",
-                "resource_uri": "/solaredx/api/dev/course/5546432f43533130312f323031335f46616c6c/",
+                "resource_uri": "/solaredx/api/v1/course/5546432f43533130312f323031335f46616c6c/",
                 "start": "Mon, 28 Oct 2013 08:00:00 -0300"
             },
             {
@@ -376,7 +448,7 @@ O JSON retornado segue abaixo:
                 "end": null,
                 "enrollment_end": null,
                 "enrollment_start": null,
-                "resource_uri": "/solaredx/api/dev/course/5546432f43533130322f323031342e32/",
+                "resource_uri": "/solaredx/api/v1/course/5546432f43533130322f323031342e32/",
                 "start": "Wed, 31 Dec 1969 21:00:00 -0300"
             }
         ]

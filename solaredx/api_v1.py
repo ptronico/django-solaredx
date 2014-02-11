@@ -66,18 +66,7 @@ class UserResource(ModelResource):
     def dehydrate(self, bundle):
         resource_uri = bundle.data['resource_uri']
         bundle.data['name'] = bundle.obj.profile.name
-        bundle.data['course_resource_uri'] = '%scourse/' % resource_uri
-
-        # course_list = []
-        # for course_enrollment in bundle.obj.courseenrollment_set.filter(is_active=True):
-        #     uri = reverse('api_dispatch_detail', kwargs={ 
-        #         'api_name': CourseResource._meta.api_name, 
-        #         'resource_name': CourseResource._meta.resource_name, 
-        #         'course_id_solaredx': course_id_encoder(course_enrollment.course_id)
-        #         })
-        #     course_list.append(uri)
-        # bundle.data['courses'] = course_list
-        
+        bundle.data['course_resource_uri'] = '%scourse/' % resource_uri        
         return bundle         
 
     def alter_list_data_to_serialize(self, request, data):
@@ -154,6 +143,7 @@ class UserResource(ModelResource):
         self._meta.validation = CleanedDataFormValidation(
             form_class=UserUpdateForm)
         self.is_valid(bundle)
+        
         if bundle.errors:
             raise ImmediateHttpResponse(response=self.error_response(
                 bundle.request, bundle.errors['user']))
@@ -184,6 +174,7 @@ class UserResource(ModelResource):
         self._meta.validation = CleanedDataFormValidation(
             form_class=UserDeleteForm)
         self.is_valid(bundle)
+        
         if bundle.errors:
             raise ImmediateHttpResponse(response=self.error_response(
                 bundle.request, bundle.errors))
@@ -194,7 +185,8 @@ class UserResource(ModelResource):
         user_delete(username=kwargs['username'])
         return http.HttpNoContent()
 
-    # Adding custom endpoint
+    # Custom endpoint: /api/v1/{user}/course/
+    # ---------------------------------------
 
     def prepend_urls(self):
         return [
@@ -214,10 +206,10 @@ class UserResource(ModelResource):
         elif request.method == 'DELETE':
             return self._enrollment_delete_list(request, **kwargs)
         else:
-            return self.create_response(request, { 'status': 'ok' })
+            return http.HttpMethodNotAllowed()
 
     def _enrollment_get_list(self, request, **kwargs):
-        course_list = [] 
+        course_list = []
         for course_enrollment in CourseEnrollment.objects.filter(
             is_active=True, user__username=kwargs['pk']):
             course_list.append(reverse('api_dispatch_detail', kwargs={ 
@@ -246,6 +238,7 @@ class UserResource(ModelResource):
         self._meta.validation = CleanedDataFormValidation(
             form_class=UserEnrollForm)
         self.is_valid(bundle)
+        
         if bundle.errors:
             raise ImmediateHttpResponse(response=self.error_response(
                 bundle.request, bundle.errors['user']))
@@ -256,6 +249,7 @@ class UserResource(ModelResource):
         course_id = course_id_decoder(
             bundle.data['course_resource_uri'].split('/')[5])
         user_enroll(kwargs['pk'], course_id)
+        del bundle.data['username']
         location = self.get_resource_uri(bundle)
         return self.create_response(request, bundle, 
             response_class=http.HttpCreated, location=location)
@@ -276,6 +270,7 @@ class UserResource(ModelResource):
         self._meta.validation = CleanedDataFormValidation(
             form_class=UserUnenrollForm)
         self.is_valid(bundle)
+        
         if bundle.errors:
             raise ImmediateHttpResponse(response=self.error_response(
                 bundle.request, bundle.errors['user']))
@@ -392,17 +387,19 @@ class CourseResource(Resource):
             response_class=http.HttpCreated)
 
     def delete_detail(self, request, **kwargs):
-        " Deleta um curso. "      
+        " Deleta um curso. "
 
         # ETAPA 1 - Desserialização e validação dos dados recebidos
         # ---------------------------------------------------------
 
+        course_id = course_id_decoder(kwargs['course_id_solaredx'])
         deserialized = self.deserialize(request, request.body, 
             format=request.META.get('CONTENT_TYPE', 'application/json'))
         deserialized = self.alter_deserialized_detail_data(
             request, deserialized)
         bundle = Bundle(data=dict_strip_unicode_keys(deserialized), 
             request=request)
+        bundle.data['course_id'] = course_id
         validation = CleanedDataFormValidation(form_class=CourseDeleteForm)
         validation_errors = validation.is_valid(bundle)
 
@@ -413,10 +410,11 @@ class CourseResource(Resource):
         # ETAPA 2 - Efetuando operações no EDX
         # ------------------------------------
 
-        course_delete(course_id_decoder(kwargs['course_id_solaredx']))
+        course_delete(course_id)
         return http.HttpNoContent()
 
-    # Outros endpoints: Staff e Instructor
+    # Custom endpoint: /api/v1/{course}/{staff|instructor}/
+    # -----------------------------------------------------
 
     def prepend_urls(self):
         return [
@@ -430,8 +428,6 @@ class CourseResource(Resource):
 
     def staff_or_instructor_dispatch(self, request, **kwargs):
 
-        print 'staff_or_instructor_dispatch'.upper()
-
         staff_or_instructor = kwargs.get('staff_or_instructor', '')
 
         if staff_or_instructor == 'staff' or \
@@ -444,48 +440,41 @@ class CourseResource(Resource):
             elif request.method == 'DELETE':
                 return self._staff_or_instructor_delete_list(request, **kwargs)
 
-        return http.HttpNotFound()
+        return http.HttpMethodNotAllowed()
 
     def _staff_or_instructor_get_list(self, request, **kwargs):
-
-        print '_staff_or_instructor_get_list'.upper()
 
         course_id = course_id_decoder(kwargs['pk'])
         staff_or_instructor = kwargs['staff_or_instructor']        
         group_name = '%s_%s' % (staff_or_instructor, course_id)
 
-        l = []
+        user_resource_uri_list = []
         for user in User.objects.filter(groups__name=group_name):
-            l.append(reverse('api_dispatch_detail', 
+            user_resource_uri_list.append(reverse('api_dispatch_detail', 
                 kwargs={ 'api_name': UserResource._meta.api_name,
                 'resource_name': UserResource._meta.resource_name, 
                 'username': user.username }))
 
-        return self.create_response(request, l)
+        return self.create_response(request, user_resource_uri_list)
 
     def _staff_or_instructor_post_list(self, request, **kwargs):
-
-        print '_staff_or_instructor_post_list'.upper()
-
-        course_id = course_id_decoder(kwargs['pk'])
-        staff_or_instructor = kwargs['staff_or_instructor']        
 
         # ETAPA 1 - Desserialização e validação dos dados recebidos
         # ---------------------------------------------------------
 
+        course_id = course_id_decoder(kwargs['pk'])
+        staff_or_instructor = kwargs['staff_or_instructor']
         deserialized = self.deserialize(request, request.body, 
             format=request.META.get('CONTENT_TYPE', 'application/json'))
         deserialized = self.alter_deserialized_detail_data(
             request, deserialized)
         bundle = Bundle(data=dict_strip_unicode_keys(deserialized), 
             request=request)
-
-        # Hack: alterando bundle.data      
+        
         if 'user_resource_uri' in bundle.data:  
             user_resource_uri = bundle.data['user_resource_uri']
         bundle.data['course_id'] = course_id
         bundle.data['staff_or_instructor'] = kwargs['staff_or_instructor']
-
         validation = CleanedDataFormValidation(form_class=CourseAddUserForm)
         validation_errors = validation.is_valid(bundle)
 
@@ -498,27 +487,25 @@ class CourseResource(Resource):
 
         username = user_resource_uri.split('/')[-2:-1][0]
         course_add_user(course_id, username, staff_or_instructor)
-        
-        return http.HttpCreated()
+        bundle = Bundle(data={ 'user_resource_uri': user_resource_uri }, 
+            request=request)
+        return self.create_response(request, bundle, 
+            response_class=http.HttpCreated)        
 
     def _staff_or_instructor_delete_list(self, request, **kwargs):
-
-        print '_staff_or_instructor_delete_list'.upper()
-
-        course_id = course_id_decoder(kwargs['pk'])
-        staff_or_instructor = kwargs['staff_or_instructor']
 
         # ETAPA 1 - Desserialização e validação dos dados recebidos
         # ---------------------------------------------------------
 
+        course_id = course_id_decoder(kwargs['pk'])
+        staff_or_instructor = kwargs['staff_or_instructor']
         deserialized = self.deserialize(request, request.body, 
             format=request.META.get('CONTENT_TYPE', 'application/json'))
         deserialized = self.alter_deserialized_detail_data(
             request, deserialized)
         bundle = Bundle(data=dict_strip_unicode_keys(deserialized), 
             request=request)
-
-        # Hack: alterando bundle.data      
+        
         if 'user_resource_uri' in bundle.data:  
             user_resource_uri = bundle.data['user_resource_uri']
         bundle.data['course_id'] = course_id
@@ -526,7 +513,7 @@ class CourseResource(Resource):
 
         validation = CleanedDataFormValidation(form_class=CourseDeleteUserForm)
         validation_errors = validation.is_valid(bundle)
-
+        
         if validation_errors:
             raise ImmediateHttpResponse(response=self.error_response(
                 bundle.request, validation_errors))
@@ -536,6 +523,5 @@ class CourseResource(Resource):
 
         username = user_resource_uri.split('/')[-2:-1][0]
         course_remove_user(course_id, username, staff_or_instructor)
-        
         return http.HttpNoContent()
 

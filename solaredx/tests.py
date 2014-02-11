@@ -11,6 +11,7 @@ from django.test import Client
 # SolarEDX
 from .edx import course_delete
 
+
 """
 Não utilizamos o ``tastypie.test.ResourceTestCase`` pois há um bug devido à
 incompatibilidade entre a versão do Tastypie (0.9.16) com a do Django (1.4.8).
