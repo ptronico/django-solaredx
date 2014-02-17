@@ -152,6 +152,11 @@ class UserResource(ModelResource):
         # ------------------------------------
 
         user_update(username=kwargs['username'], data=bundle.data)
+
+
+        return self.create_response(request, bundle, 
+            response_class=http.HttpAccepted)
+
         return http.HttpAccepted()
 
     def delete_detail(self, request, **kwargs):

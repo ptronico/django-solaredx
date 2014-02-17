@@ -19,7 +19,7 @@ alocar professores e tutores pondem ser realizadas pela API.
     :maxdepth: 5
 
     installing
-    quickstart
+    .. quickstart
     api_v1
     login
 
