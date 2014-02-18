@@ -123,6 +123,12 @@ class UserResource(ModelResource):
         # Criando usuário
         user_create(bundle.data)
 
+        # Adicionando ``resource_uri``
+        bundle.data['resource_uri'] = reverse('api_dispatch_detail', 
+            kwargs={ 'api_name': UserResource._meta.api_name,
+            'resource_name': UserResource._meta.resource_name, 
+            'username': bundle.data['username'] })        
+
         return self.create_response(request, bundle, 
             response_class=http.HttpCreated)
 
@@ -387,6 +393,12 @@ class CourseResource(Resource):
         # ------------------------------------
 
         course_create(bundle.data)
+
+        # Adicionando ``resource_uri``
+        bundle.data['resource_uri'] = reverse('api_dispatch_detail', 
+            kwargs={ 'api_name': CourseResource._meta.api_name,
+            'resource_name': CourseResource._meta.resource_name, 
+            'course_id_solaredx': course_id_encoder(bundle.data['course_id'])})
 
         return self.create_response(request, bundle, 
             response_class=http.HttpCreated)

@@ -248,7 +248,8 @@ Caso a operação seja efetuada com sucesso, será retornado uma resposta
     {
         "email": "ptronico@gmail.com",
         "name": "Pedro Vasconcelos",
-        "username": "ptronico"
+        "username": "ptronico",
+        "resource_uri": "/solaredx/api/v1/user/ptronico/"
     }
 
 Durante todas as requisições de modificações ou deleções de dados, bem como
@@ -513,7 +514,8 @@ Resposta:
     {
         "course_creator_username": "ptronico",
         "course_id": "UFC/C005/2014.1",
-        "display_name": "Novo Curso"
+        "display_name": "Novo Curso",
+        "resource_uri": "/solaredx/api/v1/course/5546432f433030352f323031342e31/"
     }
 
 Exclusão
