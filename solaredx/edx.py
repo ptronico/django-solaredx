@@ -92,6 +92,19 @@ def user_unenroll(username, course_id):
     user = User.objects.get(username=username)
     CourseEnrollment.unenroll(user, course_id)
 
+# Outros
+
+def get_course_id_list_as_staff_or_instructor(username, staff_or_instructor):
+    " Retorna os IDs dos cursos em que o usuário é instructor/staff. "
+
+    course_id_set = set()
+    group_name_prefix = '%s_' % staff_or_instructor
+    user = User.objects.get(username=username)    
+
+    for group in user.groups.filter(name__startswith=group_name_prefix):
+        course_id_set.add(group.name.replace(group_name_prefix, ''))
+
+    return list(course_id_set)
 
 # COURSE - Classes e funções relacionadas a cursos
 # ------------------------------------------------

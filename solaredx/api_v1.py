@@ -22,8 +22,8 @@ from student.models import CourseEnrollment
 
 # SolarEDX
 from .edx import (user_create, user_update, user_delete, 
-    user_enroll, user_unenroll, course_create, course_delete, 
-    course_add_user, course_remove_user)
+    user_enroll, user_unenroll, get_course_id_list_as_staff_or_instructor, 
+    course_create, course_delete, course_add_user, course_remove_user)
 from .forms import (UserCreateForm, UserUpdateForm, UserDeleteForm, 
     CourseCreateForm, CourseDeleteForm, UserEnrollForm, UserUnenrollForm,
     CourseAddUserForm, CourseDeleteUserForm)
@@ -66,7 +66,9 @@ class UserResource(ModelResource):
     def dehydrate(self, bundle):
         resource_uri = bundle.data['resource_uri']
         bundle.data['name'] = bundle.obj.profile.name
-        bundle.data['course_resource_uri'] = '%scourse/' % resource_uri        
+        bundle.data['course_resource_uri'] = '%scourse/' % resource_uri
+        bundle.data['course_instructor_resource_uri'] = '%sinstructor/' % resource_uri
+        bundle.data['course_staff_resource_uri'] = '%sstaff/' % resource_uri
         return bundle         
 
     def alter_list_data_to_serialize(self, request, data):
@@ -204,7 +206,12 @@ class UserResource(ModelResource):
             url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/course%s$" % (
                 self._meta.resource_name, trailing_slash()), 
                 self.wrap_view('enrollment_dispatch'), 
-                name="api_enrollment_dispatch"), # old: update_enrollment
+                name="api_enrollment_dispatch"),
+            url(r"^(?P<resource_name>%s)/(?P<pk>\w[\w/-]*)/" \
+                "(?P<staff_or_instructor>\w+)%s$" % (
+                self._meta.resource_name, trailing_slash()), 
+                self.wrap_view('staff_or_instructor_dispatch'), 
+                name="api_staff_or_instructor_dispatch"),
         ]
 
     def enrollment_dispatch(self, request, **kwargs):
@@ -293,6 +300,33 @@ class UserResource(ModelResource):
             bundle.data['course_resource_uri'].split('/')[5])
         user_unenroll(kwargs['pk'], course_id)
         return http.HttpNoContent()
+
+    def staff_or_instructor_dispatch(self, request, **kwargs):
+        " As instructor/staff proxy. "
+        staff_or_instructor = kwargs.get('staff_or_instructor', '')
+        if staff_or_instructor == 'staff' or \
+            staff_or_instructor == 'instructor':
+            if request.method == 'GET':
+                return self._staff_or_instructor_get_list(request, **kwargs)
+            else:
+                return http.HttpMethodNotAllowed()
+        return http.HttpNotFound()
+
+    def _staff_or_instructor_get_list(self, request, **kwargs):
+
+        username = kwargs['pk']
+        staff_or_instructor = kwargs.get('staff_or_instructor', '')        
+
+        course_resource_uri_list = []
+        for course_id in get_course_id_list_as_staff_or_instructor(
+            username, staff_or_instructor):
+            course_resource_uri_list.append(reverse(
+                'api_dispatch_detail', kwargs={ 
+                'api_name': CourseResource._meta.api_name, 
+                'resource_name': CourseResource._meta.resource_name, 
+                'course_id_solaredx': course_id_encoder(course_id) }))
+
+        return self.create_response(request, course_resource_uri_list)
 
 
 # -----------------------------------------------------------------------------
