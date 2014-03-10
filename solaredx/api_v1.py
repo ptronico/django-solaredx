@@ -12,7 +12,7 @@ from tastypie.utils import trailing_slash, dict_strip_unicode_keys
 from tastypie.validation import CleanedDataFormValidation
 from tastypie.resources import Resource, ModelResource, ALL, ALL_WITH_RELATIONS
 from tastypie.authorization import Authorization
-from tastypie.exceptions import ImmediateHttpResponse
+from tastypie.exceptions import NotFound, ImmediateHttpResponse
 
 # EDX
 from xmodule.modulestore.exceptions import ItemNotFoundError
@@ -376,14 +376,17 @@ class CourseResource(Resource):
             del data.data['resource_uri']
         return data
 
+    def get_object_list(self, request):
+        return mount_course_object_list(get_visible_courses())
+
     def obj_get_list(self, bundle, **kwargs):
         return self.get_object_list(bundle.request)
     
     def obj_get(self, bundle, **kwargs):
-        for obj in self.get_object_list(bundle.request):
+        for obj in self.get_object_list(bundle.request):            
             if obj.course_id_solaredx == kwargs[self._meta.detail_uri_name]:
-                break
-        return obj
+                return obj
+        raise NotFound('Invalid resource lookup data provided (mismatched type).')
 
     def detail_uri_kwargs(self, bundle_or_obj):
         """ Semelhante ao mesmo método no `ModelResource`. """
@@ -402,8 +405,8 @@ class CourseResource(Resource):
     # class CourseResource(CourseResourceBase):
     # " Lista todos os cursos disponíveis. "
 
-    def get_object_list(self, request):
-        return mount_course_object_list(get_visible_courses())
+    # def get_detail(self, request, **kwargs):
+    #     return http.HttpNotFound()
 
     def post_list(self, request, **kwargs):        
 

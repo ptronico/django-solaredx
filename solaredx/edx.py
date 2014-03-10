@@ -251,6 +251,12 @@ def course_delete(course_id):
     """
     Deleta um curso no EDX.
     """
+    # Desmatriculando alunos
+    for course_enrollment in CourseEnrollment.objects.filter(
+        course_id=course_id):
+        CourseEnrollment.unenroll(course_enrollment.user, course_id)
+
+    # Deletando o curso
     delete_course_and_groups(course_id, True)
 
 def course_add_user(course_id, username, staff_or_instructor):
