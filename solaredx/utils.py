@@ -83,7 +83,7 @@ def generate_random_hexcode(length):
 
 def build_lms_absolute_url(path):
     # return 'http://localhost:8000%s' % path
-    return 'http://edx-api.cloudapp.net:%s' % path
+    return 'http://edx-api.cloudapp.net%s' % path
 
 def build_cms_absolute_url(path):
     # return 'http://localhost:8001%s' % path
